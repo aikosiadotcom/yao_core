@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer' as d;
 
 import 'package:flutter/material.dart';
@@ -31,6 +32,30 @@ class App with YaoRouter {
   void run() {
     Get.put(StartupController(this));
     runApp(StartupView(this.title));
+  }
+
+  Widget _runTest() {
+    Get.put(StartupController(this));
+    return StartupView(this.title);
+  }
+
+  Future<Map<String, dynamic>?> wait(EitherType<String, YaoEvent> event) async {
+    Completer<Map<String, dynamic>?> promise = Completer();
+    this.on(event, (args) async {
+      promise.complete(args);
+    });
+    return promise.future;
+  }
+
+  Future runWithTester(dynamic tester) {
+    //ignore: argument_type_not_assignable, could_not_infer
+    return Future.wait([
+      Future.any([
+        this.wait(EitherType(YaoEvent.appReady)),
+        this.wait(EitherType(YaoEvent.appError))
+      ]),
+      tester.pumpWidget(this._runTest()) as Future
+    ]);
   }
 
   void inject<T extends YaoService>(T instance, {String? tag}) {
@@ -117,18 +142,20 @@ class StartupController extends GetxController with StateMixin<bool> {
     try {
       // await Future.delayed(Duration(seconds: 10));
       await app._serviceManager.run();
-      await app._eventManager.emit(EitherType(YaoEvent.ready_services));
+      await app._eventManager.emit(EitherType(YaoEvent.serviceReady));
 
       pages = app._middlewareManager.getPages();
       if (pages.isEmpty) {
         throw NoRouteException("Please provide at least one route !");
       }
 
-      await app._eventManager.emit(EitherType(YaoEvent.ready));
-
       change(null, status: RxStatus.success());
+
+      await app._eventManager.emit(EitherType(YaoEvent.appReady));
     } catch (err) {
       change(null, status: RxStatus.error(err.toString()));
+      await app._eventManager
+          .emit(EitherType(YaoEvent.appError), {"error": err.toString()});
     }
 
     super.onInit();

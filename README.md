@@ -52,3 +52,12 @@ app.on(EitherType(YaoEvent.ready),()async{
 ```
 app.run()
 ```
+
+# Automated Test
+
+```
+final app = Yao();
+await app.runWithTester();
+```
+
+More details, checkout test\src

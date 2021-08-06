@@ -76,7 +76,7 @@ void main() async {
   final log = app.Logger("XXXXXXX");
   app.inject(TestService1());
   app.inject(TestService2());
-  app.on(EitherType(YaoEvent.ready_services), () async {
+  app.on(EitherType(YaoEvent.serviceReady), (args) async {
     print("yao");
     app.inject(TestService3());
   });

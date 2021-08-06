@@ -1,5 +1,5 @@
-typedef EventCb = Future<void> Function();
-enum YaoEvent { ready, ready_services }
+typedef EventCb = Future<void> Function(Map<String, dynamic>? args);
+enum YaoEvent { appReady, appError, serviceReady }
 
 class EitherType<A, B> {
   dynamic value;
@@ -28,11 +28,12 @@ class EventManager {
     _listener[name] = [cb];
   }
 
-  Future<void> emit(EitherType<String, YaoEvent> name) async {
+  Future<void> emit(EitherType<String, YaoEvent> name,
+      [Map<String, dynamic>? args]) async {
     for (final entry in _listener.entries) {
       if (entry.key.get() == name.get()) {
         for (final cb in entry.value) {
-          await cb();
+          await cb(args);
         }
       }
     }
