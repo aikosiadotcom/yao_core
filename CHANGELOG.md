@@ -6,3 +6,7 @@
 
 1. Add Feature Automated Test -> runWithTester(), wait()
 2. Remove dependency flutter_phoenix 
+
+## 0.0.2+1
+
+* add required route /

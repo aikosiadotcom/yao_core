@@ -140,7 +140,12 @@ class MiddlewareManager with AppMixin {
     app.log(
         "route: ${localMiddlewares.length}, spesific: ${spesificMiddlewares.length}, global: ${globalMiddlewares.length}, total: ${middlewares.length}");
 
+    /**untuk mencegah user tidak mendefenisikan route "/" */
+    bool requiredRouteFound = false;
+
     for (final handler in localMiddlewares.entries) {
+      requiredRouteFound = handler.key == Env.requiredRouteEndpoint;
+
       List<RequestHandler> spesificHandler = [];
       //spesific
       for (final spesificMw in spesificMiddlewares.entries) {
@@ -163,15 +168,26 @@ class MiddlewareManager with AppMixin {
 
             return widget;
           },
-          // binding: BindingsBuilder(() {
-          //   final c = Get.find<Response>().controller;
-          //   if (c != null) {
-          //     Get.put(c);
-          //   }
-          // }),
           middlewares: [Middleware(mws)]));
     }
 
+    if (requiredRouteFound != true) {
+      // throw Exception("Please provide route '/' using app.get('/',...)");
+      pages.add(GetPage(
+          name: Env.requiredRouteEndpoint,
+          page: () {
+            Widget widget = Get.find<Response>().widget;
+            if (widget is EmptyView) {
+              widget.c
+                  .message("Please provide route '/' using app.get('/',...)");
+            }
+
+            return widget;
+          },
+          middlewares: [
+            Middleware([...globalMiddlewares])
+          ]));
+    }
     return pages;
   }
 
@@ -198,12 +214,14 @@ extension EMiddleware on MiddlewareManager {
   Map<String, List<RequestHandler>> getSpesific() {
     return Map.from(middlewares)
       ..removeWhere((key, value) =>
-          key == Env.globalRequestHandlerId || !key.startsWith("~"));
+          key == Env.globalRequestHandlerId ||
+          !key.startsWith(Env.spesificRequestHandlerId));
   }
 
   Map<String, List<RequestHandler>> getLocal() {
     return Map.from(middlewares)
       ..removeWhere((key, value) =>
-          key == Env.globalRequestHandlerId || key.startsWith("~"));
+          key == Env.globalRequestHandlerId ||
+          key.startsWith(Env.spesificRequestHandlerId));
   }
 }

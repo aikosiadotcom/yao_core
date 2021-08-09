@@ -3,4 +3,5 @@ class Env {
   static const pluginId = "yao_core";
   static const globalRequestHandlerId = "*";
   static const spesificRequestHandlerId = "~";
+  static const requiredRouteEndpoint = "/";
 }
