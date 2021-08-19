@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class EmptyViewController extends GetxController {
-  final message =
-      "No view found. please call method next() or render() on instance of Response."
-          .obs;
-}
-
 class EmptyView extends StatelessWidget {
-  final c = EmptyViewController();
+  String message =
+      "No view found. please call method next() or render() on instance of Response.";
+
+  void setMessage(String message) {
+    this.message = message;
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         body: Center(
-          child: Text(c.message.value),
+          child: Text(message),
         ),
       ),
     );

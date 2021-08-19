@@ -1,26 +1,35 @@
 import 'dart:async';
 import 'dart:developer' as d;
 
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Route;
 import 'package:get/get.dart';
+import 'package:yao_core/src/main.dart';
 import 'package:yao_core/src/manager/event.dart';
+import 'dialog.dart';
 import 'exception/noroute.dart';
 import 'manager/middleware.dart';
 import 'mvcs.dart';
 import 'env.dart';
 
 import 'manager/service.dart';
+import 'navigator.dart';
 import 'widget/error_retrier.dart';
 
 void _log(message) {
   d.log(message, name: Env.pluginId);
 }
 
-class App with YaoRouter {
+class App with YaoRouterBase {
+  dynamic _session;
+  void set session(dynamic session) => _session = session;
+  dynamic get session => _session;
+
   String title = Env.appName;
+  final YaoDialog dialog = YaoDialog();
+  final YaoNavigator navigator = YaoNavigator();
 
   // ignore: non_constant_identifier_names
-  YaoRouter Router() => YaoRouter();
+  YaoRouterBase Router() => YaoRouterBase();
   // ignore: non_constant_identifier_names
   Function(String) Logger([String namespace = Env.pluginId]) {
     return (String message) => d.log(message, name: namespace);
@@ -62,6 +71,10 @@ class App with YaoRouter {
     _serviceManager.add<T>(instance, tag: tag);
   }
 
+  T put<T extends YaoControllerCustom>(T instance, {String? tag}) {
+    return Get.put(instance, tag: tag);
+  }
+
   T find<T extends YaoService>({String? tag}) {
     return _serviceManager.find<T>(tag: tag);
   }
@@ -70,17 +83,12 @@ class App with YaoRouter {
     _eventManager.on(name, cb);
   }
 
-  void goto(String route) {
-    // ioc.offNamed(_transformRoute(route));
-    Get.offNamed(route);
-  }
-
   void log(message) {
     _log(message);
   }
 }
 
-class YaoRouter {
+class YaoRouterBase {
   MiddlewareManager _middlewareManager = MiddlewareManager();
 
   void get(String route, RequestHandler reqHandler) {
@@ -90,15 +98,21 @@ class YaoRouter {
 
   void use(dynamic routeOrReqHandler, [dynamic routerOrReqHandler]) {
     //TODO: maybe throw error when no match signature
-    if (routeOrReqHandler is RequestHandler && routerOrReqHandler == null) {
+    if (routeOrReqHandler is YaoRouter) {
+      final String route = Route.of(routeOrReqHandler);
+      final YaoRouter tmp = routeOrReqHandler;
+      this.use(route, tmp.router);
+    } else if (routeOrReqHandler is RequestHandler &&
+        routerOrReqHandler == null) {
       _middlewareManager.add(Env.globalRequestHandlerId, routeOrReqHandler);
     } else if (routeOrReqHandler is String &&
         routerOrReqHandler is RequestHandler) {
       _middlewareManager.add(
           "${Env.spesificRequestHandlerId}$routeOrReqHandler",
           routerOrReqHandler);
-    } else if (routeOrReqHandler is String && routerOrReqHandler is YaoRouter) {
-      YaoRouter router = routerOrReqHandler;
+    } else if (routeOrReqHandler is String &&
+        routerOrReqHandler is YaoRouterBase) {
+      YaoRouterBase router = routerOrReqHandler;
 
       List<RequestHandler> globalMiddlewares =
           router._middlewareManager.getGlobal();
@@ -140,7 +154,8 @@ class StartupController extends GetxController with StateMixin<bool> {
   @override
   void onInit() async {
     try {
-      // await Future.delayed(Duration(seconds: 10));
+      // app.log("start");
+      // await Future.delayed(Duration(seconds: 5));
       await app._serviceManager.run();
       await app._eventManager.emit(EitherType(YaoEvent.serviceReady));
 
@@ -152,6 +167,8 @@ class StartupController extends GetxController with StateMixin<bool> {
       change(null, status: RxStatus.success());
 
       await app._eventManager.emit(EitherType(YaoEvent.appReady));
+      // await Future.delayed(Duration(seconds: 5));
+      // app.log("ready");
     } catch (err) {
       change(null, status: RxStatus.error(err.toString()));
       await app._eventManager
@@ -173,14 +190,22 @@ class StartupView extends GetView<StartupController> {
         (state) => GetMaterialApp(
             title: this.title,
             debugShowCheckedModeBanner: false,
+            theme: ThemeData(
+              primarySwatch: Colors.blue,
+              visualDensity: VisualDensity.adaptivePlatformDensity,
+            ),
             initialRoute: "/",
             getPages: controller.pages),
-        onLoading: Builder(
-          builder: (BuildContext context) {
-            return Center(child: CircularProgressIndicator());
-          },
-        ),
+        onLoading: Builder(builder: (BuildContext context) {
+          return MaterialApp(
+              debugShowCheckedModeBanner: false,
+              // theme: ThemeData(scaffoldBackgroundColor: Colors.blue),
+              home: Scaffold(
+                  body: SafeArea(
+                      child: Center(child: CircularProgressIndicator()))));
+        }),
         onError: (err) => MaterialApp(
+            debugShowCheckedModeBanner: false,
             home: Scaffold(
                 body: SafeArea(
                     child:

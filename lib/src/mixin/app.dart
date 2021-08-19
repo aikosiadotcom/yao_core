@@ -1,6 +1,6 @@
 import '../app.dart';
 import '../main.dart';
 
-mixin AppMixin {
+class AppMixin {
   App get app => Yao();
 }

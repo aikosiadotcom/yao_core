@@ -9,11 +9,9 @@ typedef RequestHandler = void Function(Request req, Response res);
 
 class Request {
   String route = "";
-  bool authenticated = false;
 
-  void init({String route = "", bool authenticated = false}) {
+  void init({String route = ""}) {
     this.route = route;
-    this.authenticated = authenticated;
   }
 }
 
@@ -44,27 +42,46 @@ class DefaultBinding {
   DefaultBinding();
 
   static void init() {
-    Get.put(Request());
-    Get.put(Response());
+    Get.lazyPut(() => Request(), fenix: true);
+    Get.lazyPut(() => Response(), fenix: true);
   }
 
   static void dispose() {
-    Get.delete<Request>();
-    Get.delete<Response>();
+    if (GetInstance().isRegistered<Request>()) {
+      GetInstance().delete<Request>();
+    }
+    if (GetInstance().isRegistered<Response>()) {
+      GetInstance().delete<Response>();
+    }
+  }
+
+  static void initMiddleware() {
+    DefaultBinding.dispose();
+    DefaultBinding.init();
+  }
+
+  static void initController(String? prev, String? now) {
+    if (GetInstance().isRegistered<YaoController>(tag: prev)) {
+      GetInstance().delete<YaoController>(tag: prev);
+    }
+
+    final c = Get.find<Response>().controller;
+    if (c != null) {
+      Get.put(c, tag: now);
+    }
   }
 }
 
 class Middleware extends GetMiddleware {
   List<RequestHandler> middlewares;
-  Middleware(this.middlewares);
+  Middleware(this.middlewares) {}
 
   @override
   RouteSettings? redirect(String? route) {
-    DefaultBinding.dispose();
-    DefaultBinding.init();
-
+    DefaultBinding.initMiddleware();
     Response resp = Get.find<Response>();
     Request req = Get.find<Request>();
+
     req.init(route: route != null ? route : "");
     for (final reqHandler in middlewares) {
       reqHandler(req, resp);
@@ -79,13 +96,6 @@ class Middleware extends GetMiddleware {
         return RouteSettings(name: resp.route);
       }
     }
-
-    Get.delete<YaoController>();
-    final c = Get.find<Response>().controller;
-    if (c != null) {
-      Get.put(c);
-    }
-
     return null;
   }
 
@@ -101,6 +111,7 @@ class Middleware extends GetMiddleware {
 
   @override
   GetPageBuilder? onPageBuildStart(GetPageBuilder? page) {
+    DefaultBinding.initController(Get.previousRoute, Get.currentRoute);
     return page;
   }
 
@@ -110,9 +121,7 @@ class Middleware extends GetMiddleware {
   }
 
   @override
-  void onPageDispose() {
-    // DefaultBinding.dispose();
-  }
+  void onPageDispose() {}
 }
 
 class MiddlewareManager with AppMixin {
@@ -144,6 +153,7 @@ class MiddlewareManager with AppMixin {
     bool requiredRouteFound = false;
 
     for (final handler in localMiddlewares.entries) {
+      print(handler.key);
       requiredRouteFound = handler.key == Env.requiredRouteEndpoint;
 
       List<RequestHandler> spesificHandler = [];
@@ -178,8 +188,8 @@ class MiddlewareManager with AppMixin {
           page: () {
             Widget widget = Get.find<Response>().widget;
             if (widget is EmptyView) {
-              widget.c
-                  .message("Please provide route '/' using app.get('/',...)");
+              widget.setMessage(
+                  "Please provide route '/' using app.get('/',...)");
             }
 
             return widget;

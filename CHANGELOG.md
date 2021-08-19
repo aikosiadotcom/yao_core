@@ -10,3 +10,7 @@
 ## 0.0.2+1
 
 * add required route /
+
+## 0.0.2+3
+
+* add method redirect to app

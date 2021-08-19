@@ -10,18 +10,20 @@ class ErrorRetrier extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-        child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Center(
-          child: Text(this.message),
-        ),
-        SizedBox(
-          height: 12,
-        ),
-        ElevatedButton(onPressed: () => cbRetry(), child: Text('Retry')),
-      ],
-    ));
+    return Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16),
+        child: Center(
+            child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Center(
+              child: Text(this.message),
+            ),
+            SizedBox(
+              height: 12,
+            ),
+            ElevatedButton(onPressed: () => cbRetry(), child: Text('Retry')),
+          ],
+        )));
   }
 }

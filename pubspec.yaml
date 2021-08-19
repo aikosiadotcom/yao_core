@@ -1,6 +1,6 @@
 name: yao_core
 description: a MVCS (Model-View-Controller-Service) core package used by yao framework.
-version: 0.0.2+1
+version: 0.0.2+26
 homepage: https://aikosia.com
 github: https://github.com/aikosiadotcom/yao_core
 
