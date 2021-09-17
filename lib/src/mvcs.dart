@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Route;
 import 'package:get/get.dart';
 import 'package:yao_core/src/mixin/request.dart';
 
@@ -25,10 +25,12 @@ class YaoView<T> extends StatelessWidget with AppMixin {
   Widget withScaffold(BuildContext context,
       {required Widget Function() child,
       PreferredSizeWidget? appBar,
+      bool resizeToAvoidBottomInset = true,
       Widget? bottomNavigationBar}) {
     return Scaffold(
       bottomNavigationBar: bottomNavigationBar,
       appBar: appBar,
+      resizeToAvoidBottomInset: resizeToAvoidBottomInset,
       body: SafeArea(
         child: child(),
       ),
@@ -39,6 +41,7 @@ class YaoView<T> extends StatelessWidget with AppMixin {
       {required Widget Function() child,
       PreferredSizeWidget? appBar,
       Future Function()? onError,
+      bool resizeToAvoidBottomInset = true,
       T? controller,
       Widget? bottomNavigationBar}) {
     StateMixin tmp;
@@ -55,24 +58,29 @@ class YaoView<T> extends StatelessWidget with AppMixin {
       return withScaffold(context,
           child: child,
           appBar: appBar,
+          resizeToAvoidBottomInset: resizeToAvoidBottomInset,
           bottomNavigationBar: bottomNavigationBar);
     }, onLoading: Builder(
       builder: (BuildContext context) {
-        return Center(child: CircularProgressIndicator());
+        return withScaffold(context, child: () {
+          return Container(child: Center(child: CircularProgressIndicator()));
+        });
       },
     ), onError: (err) {
-      if (onError != null) {
-        return MaterialApp(
-            debugShowCheckedModeBanner: false,
-            home: withScaffold(context, child: () {
-              return ErrorRetrier(err == null ? "" : err, () async {
-                // final request = Get.find<Request>();
-                Get.offNamed(Get.currentRoute, preventDuplicates: false);
-              });
-            }));
+      if (onError == null) {
+        return withScaffold(context, child: () {
+          return ErrorRetrier(err == null ? "" : err, () async {
+            await app.navigator.goto(
+                "${"/redirect"}?next=${Get.currentRoute}&desc=Memuat ulang...");
+            // await Get.offNamed(Get.currentRoute, preventDuplicates: false);
+            // await Get.offAndToNamed(Get.currentRoute);
+          });
+        });
       } else {
-        return ErrorRetrier(err == null ? "" : err, () async {
-          await onError!();
+        return withScaffold(context, child: () {
+          return ErrorRetrier(err == null ? "" : err, () async {
+            await onError();
+          });
         });
       }
     },
@@ -93,5 +101,3 @@ abstract class YaoControllerCustom extends GetxController
 
 abstract class YaoControllerCustomWithState<T> extends YaoControllerCustom
     with StateMixin<T> {}
-
-typedef YaoBuilder = GetBuilder;

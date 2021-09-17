@@ -9,6 +9,7 @@ environment:
   flutter: ">=1.17.0"
 
 dependencies:
+  cool_alert: ^1.1.0
   flutter:
     sdk: flutter
   get: ^4.1.4

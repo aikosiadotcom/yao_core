@@ -20,6 +20,8 @@ void _log(message) {
 }
 
 class App with YaoRouterBase {
+  final YaoLoader loader = YaoLoader();
+
   dynamic _session;
   void set session(dynamic session) => _session = session;
   dynamic get session => _session;

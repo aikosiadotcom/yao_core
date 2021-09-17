@@ -31,7 +31,7 @@ class TestRouteController extends YaoController {
   TestRouteController(this.route);
 
   void goto() {
-    app.goto(this.route);
+    // app.goto(this.route);
   }
 }
 

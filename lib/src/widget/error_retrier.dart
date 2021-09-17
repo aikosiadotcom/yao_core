@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-typedef CbRetry = Future<void> Function();
+typedef CbRetry = Future Function();
 
 ///Controller perlu init manual karena belum ada binding
 class ErrorRetrier extends StatelessWidget {
@@ -17,7 +17,10 @@ class ErrorRetrier extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Center(
-              child: Text(this.message),
+              child: Text(
+                this.message,
+                textAlign: TextAlign.center,
+              ),
             ),
             SizedBox(
               height: 12,

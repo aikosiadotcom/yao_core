@@ -14,6 +14,9 @@ class YaoNavigator {
     int? id,
     Map<String, String>? parameters,
   }) {
+    // Get.removeRoute(RouteSettings);
+    // return Get.toNamed(page,
+    //     arguments: arguments, id: id, parameters: parameters);
     return Get.offAndToNamed(page,
         arguments: arguments, id: id, parameters: parameters);
   }
