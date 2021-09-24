@@ -31,6 +31,8 @@ class YaoDialog {
       required Future Function() onConfirm}) async {
     await CoolAlert.show(
         context: Get.context!,
+        confirmBtnText: "Ya",
+        cancelBtnText: "Tidak",
         type: CoolAlertType.confirm,
         text: message,
         onConfirmBtnTap: () async {

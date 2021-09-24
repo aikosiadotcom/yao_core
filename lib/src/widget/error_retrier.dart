@@ -25,7 +25,7 @@ class ErrorRetrier extends StatelessWidget {
             SizedBox(
               height: 12,
             ),
-            ElevatedButton(onPressed: () => cbRetry(), child: Text('Retry')),
+            ElevatedButton(onPressed: () => cbRetry(), child: Text('Muat Ulang')),
           ],
         )));
   }

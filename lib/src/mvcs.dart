@@ -62,21 +62,33 @@ class YaoView<T> extends StatelessWidget with AppMixin {
           bottomNavigationBar: bottomNavigationBar);
     }, onLoading: Builder(
       builder: (BuildContext context) {
+        if (appBar == null) {
+          return Container(child: Center(child: CircularProgressIndicator()));
+        }
         return withScaffold(context, child: () {
           return Container(child: Center(child: CircularProgressIndicator()));
         });
       },
     ), onError: (err) {
       if (onError == null) {
+        if (appBar == null) {
+          return ErrorRetrier(err == null ? "" : err, () async {
+            await app.navigator.goto(
+                "${"/redirect"}?next=${Get.currentRoute}&desc=Memuat ulang...");
+          });
+        }
         return withScaffold(context, child: () {
           return ErrorRetrier(err == null ? "" : err, () async {
             await app.navigator.goto(
                 "${"/redirect"}?next=${Get.currentRoute}&desc=Memuat ulang...");
-            // await Get.offNamed(Get.currentRoute, preventDuplicates: false);
-            // await Get.offAndToNamed(Get.currentRoute);
           });
         });
       } else {
+        if (appBar == null) {
+          return ErrorRetrier(err == null ? "" : err, () async {
+            await onError();
+          });
+        }
         return withScaffold(context, child: () {
           return ErrorRetrier(err == null ? "" : err, () async {
             await onError();
