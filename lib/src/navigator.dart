@@ -28,4 +28,8 @@ class YaoNavigator {
 
     return this.goto(_root);
   }
+  
+  Future currentRoute<T>() {
+    return Get.currentRoute;
+  }
 }
