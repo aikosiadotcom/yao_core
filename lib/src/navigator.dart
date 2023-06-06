@@ -29,7 +29,7 @@ class YaoNavigator {
     return this.goto(_root);
   }
   
- static String currentRoute() {
+ String currentRoute() {
     return Get.currentRoute;
   }
 }
