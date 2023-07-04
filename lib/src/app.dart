@@ -183,7 +183,6 @@ class StartupController extends GetxController with StateMixin<bool> {
 
 class StartupView extends GetView<StartupController> {
   final String title;
-  final Color? color;
 
   StartupView(this.title);
 
@@ -197,7 +196,7 @@ class StartupView extends GetView<StartupController> {
               useMaterial3: true,
               primarySwatch: Colors.blue,
               visualDensity: VisualDensity.adaptivePlatformDensity,
-              colorSchemeSeed: this.color ?? Colors.blue,
+              colorSchemeSeed: Color(0xFF369CF0),
             ),
             initialRoute: "/",
             getPages: controller.pages),
