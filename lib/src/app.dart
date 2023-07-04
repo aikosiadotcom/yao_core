@@ -194,7 +194,6 @@ class StartupView extends GetView<StartupController> {
             debugShowCheckedModeBanner: false,
             theme: ThemeData(
               useMaterial3: true,
-              primarySwatch: Colors.blue,
               visualDensity: VisualDensity.adaptivePlatformDensity,
               colorSchemeSeed: Color(0xFF369CF0),
             ),
